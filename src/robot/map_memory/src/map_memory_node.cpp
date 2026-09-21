@@ -2,6 +2,24 @@
 
 MapMemoryNode::MapMemoryNode() : Node("map_memory"), map_memory_(robot::MapMemoryCore(this->get_logger())) {
 
+    this->declare_parameter("resolution", 0.1);           // metres per cell
+    this->declare_parameter("width_cells", 300);          // 300 cells at 0.1 m is 30 m
+    this->declare_parameter("height_cells", 300);
+    this->declare_parameter("origin_x", -15.0);           // world coordinate of cell (0,0)
+    this->declare_parameter("origin_y", -15.0);
+    this->declare_parameter("update_period_seconds", 1);  // how often the global map is republished
+    this->declare_parameter("move_threshold", 1.5);       // metres of travel before integrating a scan
+
+    resolution            = this->get_parameter("resolution").as_double();
+    width_cells           = this->get_parameter("width_cells").as_int();
+    height_cells          = this->get_parameter("height_cells").as_int();
+    origin_x              = this->get_parameter("origin_x").as_double();
+    origin_y              = this->get_parameter("origin_y").as_double();
+    update_period_seconds = this->get_parameter("update_period_seconds").as_int();
+    move_threshold        = this->get_parameter("move_threshold").as_double();
+
+    map_memory_.initialize(resolution, width_cells, height_cells, origin_x, origin_y);
+
     costmap_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
             "/costmap", 10, std::bind(&MapMemoryNode::costmapCallback, this, std::placeholders::_1));
     odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
@@ -11,7 +29,7 @@ MapMemoryNode::MapMemoryNode() : Node("map_memory"), map_memory_(robot::MapMemor
 
 
     timer_ = this->create_wall_timer(
-        std::chrono::seconds(1), std::bind(&MapMemoryNode::updateMap, this));
+        std::chrono::seconds(update_period_seconds), std::bind(&MapMemoryNode::updateMap, this));
 
 }
 
@@ -30,7 +48,7 @@ void MapMemoryNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg){
 
 
     double distance = std::sqrt(std::pow(x - last_x, 2) + std::pow(y - last_y, 2));
-    if (distance >= 1.5) { // Update distance threshold to not have a magic number ***
+    if (distance >= move_threshold) {
         last_x = x;
         last_y = y;
         update_map_ = true;

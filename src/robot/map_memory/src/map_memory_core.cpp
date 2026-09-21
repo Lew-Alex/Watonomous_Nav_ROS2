@@ -1,20 +1,28 @@
 #include "map_memory_core.hpp"
 
+namespace
+{
+constexpr int8_t kUnknown = -1;  // never observed
+}
+
 namespace robot
 {
 
-MapMemoryCore::MapMemoryCore(const rclcpp::Logger& logger) : logger_(logger) {
+MapMemoryCore::MapMemoryCore(const rclcpp::Logger& logger) : logger_(logger) {}
+
+void MapMemoryCore::initialize(double resolution, int width_cells, int height_cells,
+                               double origin_x, double origin_y){
 
     global_map_ = std::make_shared<nav_msgs::msg::OccupancyGrid>();
 
-    global_map_->info.resolution = 0.1f;
-    global_map_->info.width  = 300;         // 30 m
-    global_map_->info.height = 300;
-    global_map_->info.origin.position.x = -15.0;
-    global_map_->info.origin.position.y = -15.0;
+    global_map_->info.resolution = resolution;
+    global_map_->info.width  = width_cells;
+    global_map_->info.height = height_cells;
+    global_map_->info.origin.position.x = origin_x;
+    global_map_->info.origin.position.y = origin_y;
     global_map_->header.frame_id = "sim_world";
 
-    global_map_->data.assign(global_map_->info.width * global_map_->info.height, -1); // Starts unknown
+    global_map_->data.assign(global_map_->info.width * global_map_->info.height, kUnknown);
 }
 
 
@@ -53,9 +61,9 @@ nav_msgs::msg::OccupancyGrid::SharedPtr MapMemoryCore::intergrateMap(nav_msgs::m
 
             int global_idx = static_cast<size_t>(global_y_i) * global_map_->info.width + global_x_i;
 
-            if (global_map_->data[global_idx] < new_map->data[idx]){
+            // if (global_map_->data[global_idx] < new_map->data[idx]){
                 global_map_->data[global_idx] = new_map->data[idx];
-            }
+            // }
 
             
 

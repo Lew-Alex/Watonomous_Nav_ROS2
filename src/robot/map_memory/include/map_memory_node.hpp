@@ -14,6 +14,16 @@ class MapMemoryNode : public rclcpp::Node {
 
   private:
     robot::MapMemoryCore map_memory_;
+
+    // Parameters
+    double resolution;
+    int width_cells;
+    int height_cells;
+    double origin_x;
+    double origin_y;
+    int update_period_seconds;
+    double move_threshold;
+
     double last_x = 0.0, last_y = 0.0;
     bool update_map_ = true;
 
