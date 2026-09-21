@@ -1,5 +1,10 @@
 #include "control_core.hpp"
 
+namespace
+{
+constexpr double kTargetEpsilon = 1e-6;  // squared metres; target effectively on top of us
+}
+
 namespace robot
 {
 
@@ -58,17 +63,22 @@ geometry_msgs::msg::Twist ControlCore::computeVelocity(geometry_msgs::msg::PoseS
     const double local_y = -dx * std::sin(yaw) + dy * std::cos(yaw);
 
     const double l2 = local_x * local_x + local_y * local_y;
-    if (l2 < 1e-6){
+    if (l2 < kTargetEpsilon){
         return geometry_msgs::msg::Twist(); // target is basically on top of us
     }
 
+    // angle from the nose to the target, positive = target is to our left
+    const double alpha = std::atan2(local_y, local_x);
+
     const double curvature = 2.0 * local_y / l2;
 
-    geometry_msgs::msg::Twist cmd_vel;
-    cmd_vel.linear.x  = linear_speed_;
-    cmd_vel.angular.z = linear_speed_ * curvature;
+    const double linear_error = hypot(dx, dy);
+    const double power = linear_error * speed_gain_;
 
-    
+    geometry_msgs::msg::Twist cmd_vel;
+    cmd_vel.linear.x  = std::clamp(power, min_speed_, max_speed_);
+    cmd_vel.angular.z = cmd_vel.linear.x * curvature;
+
     return cmd_vel;
 
 }

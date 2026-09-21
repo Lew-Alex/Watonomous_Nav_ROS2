@@ -15,6 +15,10 @@ class ControlNode : public rclcpp::Node {
   private:
     robot::ControlCore control_;
 
+    // Parameters
+    int control_period_ms;
+    double arrival_tolerance;
+
     rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr path_sub_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;

@@ -18,15 +18,16 @@ class ControlCore {
 
     geometry_msgs::msg::Twist computeVelocity(geometry_msgs::msg::PoseStamped* target, nav_msgs::msg::Odometry::SharedPtr odom);
 
+    // Parameters
+    double look_ahead_dis_ = 2.0;
+    double speed_gain_     = 1.5;
+    double min_speed_      = 0.75;
+    double max_speed_      = 3.0;
 
-  
   private:
     rclcpp::Logger logger_;
 
     double extractYaw(const geometry_msgs::msg::Quaternion & q);
-
-    double look_ahead_dis_ = 1.0;
-    double linear_speed_ = 1.0;
 };
 
 } 
