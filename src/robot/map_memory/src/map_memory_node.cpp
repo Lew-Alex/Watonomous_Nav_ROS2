@@ -2,9 +2,9 @@
 
 MapMemoryNode::MapMemoryNode() : Node("map_memory"), map_memory_(robot::MapMemoryCore(this->get_logger())) {
 
-    this->declare_parameter("resolution", 0.1);           // metres per cell
-    this->declare_parameter("width_cells", 300);          // 300 cells at 0.1 m is 30 m
-    this->declare_parameter("height_cells", 300);
+    this->declare_parameter("resolution", 0.25);          // metres per cell // ***
+    this->declare_parameter("width_cells", 120);          // 120 cells at 0.25 m is 30 m // ***
+    this->declare_parameter("height_cells", 120);         // ***
     this->declare_parameter("origin_x", -15.0);           // world coordinate of cell (0,0)
     this->declare_parameter("origin_y", -15.0);
     this->declare_parameter("update_period_seconds", 1);  // how often the global map is republished
