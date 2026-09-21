@@ -21,6 +21,10 @@ class PlannerNode : public rclcpp::Node {
 
     robot::PlannerCore planner_;
 
+    // Parameters
+    int replan_period_ms;
+    double goal_tolerance;
+
     // Pub/Sub stuff
     rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr map_sub_;
     rclcpp::Subscription<geometry_msgs::msg::PointStamped >::SharedPtr goal_sub_;

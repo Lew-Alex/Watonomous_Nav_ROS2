@@ -1,3 +1,7 @@
-# planner_node:
-#   ros__parameters:
-    
+planner_node:
+  ros__parameters:
+    replan_period_ms: 500        # how often the planner re-runs while driving
+    goal_tolerance: 0.5          # metres to the goal point that counts as arrived
+    blocked_cost_threshold: 15   # map cost at or above this counts as a wall
+    step_straight: 1.0           # cost of a 4-connected step
+    step_diagonal: 1.41          # cost of an 8-connected step

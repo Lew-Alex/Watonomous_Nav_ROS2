@@ -1,6 +1,20 @@
 #include "planner_node.hpp"
 
 PlannerNode::PlannerNode() : Node("planner"), planner_(robot::PlannerCore(this->get_logger())) {
+
+    this->declare_parameter("replan_period_ms", 500);      // how often the planner re-runs
+    this->declare_parameter("goal_tolerance", 0.5);        // metres to the goal that counts as arrived
+    this->declare_parameter("blocked_cost_threshold", 15); // map cost at or above this is a wall
+    this->declare_parameter("step_straight", 1.0);  
+    this->declare_parameter("step_diagonal", 1.41);     
+
+    replan_period_ms = this->get_parameter("replan_period_ms").as_int();
+    goal_tolerance   = this->get_parameter("goal_tolerance").as_double();
+
+    planner_.blocked_cost_threshold_ = static_cast<int8_t>(this->get_parameter("blocked_cost_threshold").as_int());
+    planner_.step_straight_          = this->get_parameter("step_straight").as_double();
+    planner_.step_diagonal_          = this->get_parameter("step_diagonal").as_double();
+
     // Subscribers
     map_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>(
         "/map", 10, std::bind(&PlannerNode::mapCallback, this, std::placeholders::_1));
@@ -14,7 +28,7 @@ PlannerNode::PlannerNode() : Node("planner"), planner_(robot::PlannerCore(this->
 
     // Timer
     timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(500), std::bind(&PlannerNode::timerCallback, this));
+        std::chrono::milliseconds(replan_period_ms), std::bind(&PlannerNode::timerCallback, this));
 }
 
 // Call back methods
@@ -53,7 +67,7 @@ void PlannerNode::timerCallback(){
 bool PlannerNode::goalReached(){
     double dx = goal_.point.x - odom_.position.x;
     double dy = goal_.point.y - odom_.position.y;
-    return std::sqrt(dx * dx + dy * dy) < 0.5;
+    return std::sqrt(dx * dx + dy * dy) < goal_tolerance;
 
 }
 

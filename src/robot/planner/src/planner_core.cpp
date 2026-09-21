@@ -43,20 +43,20 @@ void PlannerCore::plan(nav_msgs::msg::Path* path, nav_msgs::msg::OccupancyGrid* 
             return true; 
         }
         const int8_t cost = map->data[static_cast<size_t>(c.y) * width + c.x];
-        return cost >= 25; // 50 threshold for if its blocked or not
+        return cost >= blocked_cost_threshold_;
     };
 
     struct Step { int dx; int dy; double cost; };
     const std::vector<Step> neighbours = {
-        { 1,  0, 1.0},
-        {-1,  0, 1.0},
-        { 0,  1, 1.0},
-        { 0, -1, 1.0},
+        { 1,  0, step_straight_},
+        {-1,  0, step_straight_},
+        { 0,  1, step_straight_},
+        { 0, -1, step_straight_},
 
-        { 1, 1, 1.41},
-        { 1, -1, 1.41},
-        { -1, -1, 1.41},
-        { -1, 1, 1.41},
+        { 1, 1, step_diagonal_},
+        { 1, -1, step_diagonal_},
+        { -1, -1, step_diagonal_},
+        { -1, 1, step_diagonal_},
     };
 
     auto calc_h = [&](const CellIndex & c) {

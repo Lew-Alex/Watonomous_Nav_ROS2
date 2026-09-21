@@ -64,6 +64,11 @@ class PlannerCore {
                 geometry_msgs::msg::PointStamped* goal,
                 geometry_msgs::msg::Pose* odom);
 
+    // Parameters
+    int8_t blocked_cost_threshold_ = 15;    // map cost at or above this counts as a wall
+    double step_straight_          = 1.0;   // cost of a 4-connected step
+    double step_diagonal_          = 1.41;  // cost of an 8-connected step
+
   private:
     rclcpp::Logger logger_;
 
