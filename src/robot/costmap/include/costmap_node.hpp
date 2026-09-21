@@ -18,6 +18,8 @@ private:
     double resolution;
     double width;
     double height;
+    double inflation_radius;
+    uint8_t max_cost;
 
     robot::CostmapCore costmap_;
 

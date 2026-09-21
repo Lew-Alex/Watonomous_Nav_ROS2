@@ -13,7 +13,8 @@ public:
     // Constructor, we pass in the node's RCLCPP logger to enable logging to terminal
     explicit CostmapCore(const rclcpp::Logger& logger);
 
-    void intialize(double resolution, double width, double height);
+    void intialize(double resolution, double width, double height,
+                   double inflation_radius, int max_cost);
 
     void setObstacle(double angle, double range);
 
@@ -22,6 +23,8 @@ public:
     double resolution_;
     int    width_cells_;
     int    height_cells_;
+    double inflation_radius_ = 2.0;
+    uint8_t max_cost_        = 100;
 
     std::vector<int8_t>* grid();
 

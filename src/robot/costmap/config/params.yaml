@@ -1,5 +1,7 @@
 costmap_node:
   ros__parameters:
-    resolution: 0.1
-    width: 24.0
+    resolution: 0.1          # metres per cell
+    width: 24.0              # metres, the window is centred on the robot
     height: 24.0
+    inflation_radius: 2.0    # metres of cost falloff around an obstacle
+    max_cost: 100            # cost written for an obstacle cell, and the ceiling for inflation

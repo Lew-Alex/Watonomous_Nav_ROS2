@@ -14,10 +14,14 @@ CostmapNode::CostmapNode() : Node("costmap"), costmap_(robot::CostmapCore(this->
     this->declare_parameter("resolution", 0.1); // Meters / cell
     this->declare_parameter("width", 24.0); // Width in Meters
     this->declare_parameter("height", 24.0); // Height in Meters
+    this->declare_parameter("inflation_radius", 2.0); // Meters of cost falloff around an obstacle
+    this->declare_parameter("max_cost", 100); // Cost written for an obstacle cell
 
     resolution = this->get_parameter("resolution").as_double();
     width = this->get_parameter("width").as_double();
     height = this->get_parameter("height").as_double();
+    inflation_radius = this->get_parameter("inflation_radius").as_double();
+    max_cost = static_cast<uint8_t>(this->get_parameter("max_cost").as_int());
 }
 
 void CostmapNode::publishCostMap(const sensor_msgs::msg::LaserScan::SharedPtr scan){
@@ -46,7 +50,7 @@ void CostmapNode::laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr sca
     // status_pub_->publish(msg);
     
 
-    costmap_.intialize(resolution, width, height);
+    costmap_.intialize(resolution, width, height, inflation_radius, max_cost);
 
     double SCAN_MAX = scan->range_max;
     double SCAN_MIN = scan->range_min;

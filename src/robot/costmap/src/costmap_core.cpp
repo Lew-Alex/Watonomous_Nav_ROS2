@@ -1,6 +1,11 @@
 #include "costmap_core.hpp"
 #include <cmath>
 
+namespace
+{
+constexpr uint8_t kFreeCost = 0;  // a cell nothing has been seen in
+}
+
 namespace robot
 {
 
@@ -8,12 +13,15 @@ CostmapCore::CostmapCore(const rclcpp::Logger& logger) : logger_(logger) {}
     
 
 
-void CostmapCore::intialize(double resolution, double width, double height){
-    this->resolution_   = resolution;
-    this->width_cells_  = static_cast<int>(width / resolution);
-    this->height_cells_ = static_cast<int>(height / resolution);
+void CostmapCore::intialize(double resolution, double width, double height,
+                            double inflation_radius, int max_cost){
+    this->resolution_       = resolution;
+    this->width_cells_      = static_cast<int>(width / resolution);
+    this->height_cells_     = static_cast<int>(height / resolution);
+    this->inflation_radius_ = inflation_radius;
+    this->max_cost_         = static_cast<uint8_t>(max_cost);
 
-    grid_.assign(static_cast<size_t>(width_cells_) * static_cast<size_t>(height_cells_), 0);
+    grid_.assign(static_cast<size_t>(width_cells_) * static_cast<size_t>(height_cells_), kFreeCost);
 }
 
 
@@ -23,14 +31,14 @@ void CostmapCore::setObstacle(double angle, double range){
     double obstacle_x = range * cos(angle);
     double obstacle_y = range * sin(angle);
 
-    this->setGrid(obstacle_x, obstacle_y, 100); // Change max cost to var ***
+    this->setGrid(obstacle_x, obstacle_y, max_cost_);
 }
 
 void CostmapCore::inflate(){
     for (int y = 0; y < height_cells_; y++){
         for (int x = 0; x < width_cells_; x++){
             uint32_t idx = getGrid(x, y);
-            if (grid_[idx] == 100){
+            if (grid_[idx] == max_cost_){
                 propagateCost(x, y);
             }
         }
@@ -38,9 +46,7 @@ void CostmapCore::inflate(){
 }
 
 void CostmapCore::propagateCost(int x, int y){
-    double inflation_radius = 2.0; // Make this a var etc change later cleanup ***
-
-    int reach = std::ceil(inflation_radius / resolution_);
+    int reach = std::ceil(inflation_radius_ / resolution_);
 
     for (int dy = -reach; dy <= reach; dy++){
         for (int dx = -reach; dx <= reach; dx++){
@@ -58,11 +64,11 @@ void CostmapCore::propagateCost(int x, int y){
 
             double distance = std::hypot(dx, dy) * resolution_;
 
-            if (distance > inflation_radius){
+            if (distance > inflation_radius_){
                 continue;
             }
 
-            int cost = static_cast<uint8_t>(100 * (1.0 - distance / inflation_radius)); // Change max cost to var ***
+            int cost = static_cast<uint8_t>(max_cost_ * (1.0 - distance / inflation_radius_));
 
             // Update cost if its higher
             if (grid_[getGrid(x_, y_)] < cost) grid_[getGrid(x_, y_)] = cost;
